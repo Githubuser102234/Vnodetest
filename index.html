@@ -134,10 +134,10 @@
             </div>
         </div>
         
-        <!-- Create Profile View -->
+        <!-- Create/Edit Profile View -->
         <div id="create-profile-view" class="hidden flex flex-col space-y-6">
-            <h1 class="text-3xl font-bold text-center text-gray-800">Create Personal Profile</h1>
-            <p class="text-center text-gray-600">Create a unique profile to share your work.</p>
+            <h1 id="profile-form-header" class="text-3xl font-bold text-center text-gray-800">Create Personal Profile</h1>
+            <p id="profile-form-subheader" class="text-center text-gray-600">Create a unique profile to share your work.</p>
             
             <label for="profile-nickname" class="text-sm font-medium text-gray-700">Nickname</label>
             <input type="text" id="profile-nickname" placeholder="Your nickname"
@@ -288,9 +288,11 @@
         const viewProfileBtn = document.getElementById('view-profile-btn');
         const backFromProfileBtn = document.getElementById('back-from-profile-btn');
         const editProfileBtn = document.getElementById('edit-profile-btn');
+        const profileFormHeader = document.getElementById('profile-form-header');
+        const profileFormSubheader = document.getElementById('profile-form-subheader');
 
 
-        let db, auth, userId, hasProfile = false, currentUsername = null;
+        let db, auth, userId, hasProfile = false, currentUsername = null, isEditingProfile = false;
 
         async function initializeAppAndAuth() {
             try {
@@ -331,24 +333,38 @@
         
         function handleRouting() {
             const path = window.location.pathname;
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            // Check for profile view
             if (path.startsWith('/profiles/')) {
                 const username = path.split('/')[2];
                 if (username) {
                     showProfileView(username);
-                } else {
-                    showMainView();
-                }
-            } else if (path === '/account/createprofile') {
-                showCreateProfileView();
-            } else {
-                const urlParams = new URLSearchParams(window.location.search);
-                const pageId = urlParams.get('pageId');
-                if (pageId) {
-                    showPreview(pageId);
-                } else {
-                    showMainView();
+                    return;
                 }
             }
+
+            // Check for create/edit profile view
+            if (path === '/account/createprofile') {
+                showCreateProfileView();
+                return;
+            }
+
+            // Check for page preview view
+            const pageId = urlParams.get('pageId');
+            if (path.startsWith('/pages/') && path.split('/').length === 3) {
+                const pageIdFromPath = path.split('/')[2];
+                if (pageIdFromPath) {
+                    showPreview(pageIdFromPath);
+                    return;
+                }
+            } else if (pageId) {
+                showPreview(pageId);
+                return;
+            }
+
+            // Default to main view
+            showMainView();
         }
 
         async function checkUserProfile() {
@@ -408,13 +424,45 @@
             loadUserLinks();
         }
 
-        function showCreateProfileView() {
+        async function showCreateProfileView() {
             if (auth.currentUser && auth.currentUser.isAnonymous) {
                 history.pushState({}, '', '/');
                 showMainView();
                 return;
             }
+
             showView('create-profile-view');
+            usernameStatus.textContent = '';
+            
+            if (hasProfile) {
+                isEditingProfile = true;
+                profileFormHeader.textContent = "Edit Personal Profile";
+                profileFormSubheader.textContent = "Update your nickname and bio.";
+                createProfileSubmitBtn.textContent = "Update Profile";
+                profileUsernameInput.disabled = true;
+
+                try {
+                    const profileDoc = await getDoc(doc(db, 'profiles', userId));
+                    if (profileDoc.exists()) {
+                        const data = profileDoc.data();
+                        profileNicknameInput.value = data.nickname;
+                        profileUsernameInput.value = data.username;
+                        profileBioInput.value = data.bio;
+                    }
+                } catch (error) {
+                    console.error("Error fetching profile data for editing:", error);
+                }
+
+            } else {
+                isEditingProfile = false;
+                profileFormHeader.textContent = "Create Personal Profile";
+                profileFormSubheader.textContent = "Create a unique profile to share your work.";
+                createProfileSubmitBtn.textContent = "Create Profile";
+                profileUsernameInput.disabled = false;
+                profileNicknameInput.value = '';
+                profileUsernameInput.value = '';
+                profileBioInput.value = '';
+            }
         }
 
         async function showProfileView(username) {
@@ -499,7 +547,15 @@
             }
         }
 
-        async function createOrUpdateProfile() {
+        async function submitProfileForm() {
+            if (isEditingProfile) {
+                await updateProfile();
+            } else {
+                await createProfile();
+            }
+        }
+
+        async function createProfile() {
             const username = profileUsernameInput.value.trim().toLowerCase();
             const nickname = profileNicknameInput.value.trim();
             const bio = profileBioInput.value.trim();
@@ -515,7 +571,6 @@
             }
 
             try {
-                // Check if username is already taken
                 const usernameQuery = query(collection(db, 'profiles'), where('username', '==', username));
                 const usernameSnapshot = await getDocs(usernameQuery);
                 const unavailableQuery = query(collection(db, 'unavailableUsernames'), where('username', '==', username));
@@ -544,6 +599,28 @@
             }
         }
 
+        async function updateProfile() {
+            const nickname = profileNicknameInput.value.trim();
+            const bio = profileBioInput.value.trim();
+            
+            if (!nickname) {
+                usernameStatus.textContent = "Nickname is required.";
+                return;
+            }
+
+            try {
+                await updateDoc(doc(db, 'profiles', userId), {
+                    nickname,
+                    bio
+                });
+                console.log("Profile updated successfully!");
+                history.pushState({}, '', `/profiles/${currentUsername}`);
+                showProfileView(currentUsername);
+            } catch (error) {
+                console.error("Error updating profile:", error);
+                usernameStatus.textContent = "An error occurred. Please try again.";
+            }
+        }
 
         async function generateLink() {
             if (!userId) {
@@ -607,7 +684,6 @@
                 if (docSnap.exists()) {
                     const data = docSnap.data();
                     
-                    // Check if the owner's account has been "deleted"
                     const userDocRef = doc(db, 'deletedUsers', data.userId);
                     const userDocSnap = await getDoc(userDocRef);
                     if (userDocSnap.exists()) {
@@ -786,7 +862,7 @@
             history.pushState({}, '', '/');
             showMainView();
         });
-        createProfileSubmitBtn.addEventListener('click', createOrUpdateProfile);
+        createProfileSubmitBtn.addEventListener('click', submitProfileForm);
         viewProfileBtn.addEventListener('click', () => {
             history.pushState({}, '', `/profiles/${currentUsername}`);
             showProfileView(currentUsername);
