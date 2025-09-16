@@ -64,15 +64,15 @@
                 <button id="your-links-btn" class="text-left text-gray-700 hover:text-blue-600 transition-colors duration-200">
                     Your Created HTML Links
                 </button>
-                <div id="account-management-menu">
+                <div id="account-management-menu" class="hidden">
                     <button id="account-management-btn" class="text-left text-gray-700 hover:text-blue-600 transition-colors duration-200">
                         Account Management
                     </button>
                     <div id="account-options" class="pl-4 hidden flex flex-col space-y-2 pt-2 border-t mt-2">
-                        <button id="create-profile-btn" class="text-left text-gray-700 hover:text-blue-600 transition-colors duration-200">
+                        <button id="create-profile-btn" class="text-left text-gray-700 hover:text-blue-600 transition-colors duration-200 hidden">
                             Create Personal Profile
                         </button>
-                        <button id="view-profile-btn" class="text-left text-gray-700 hover:text-blue-600 transition-colors duration-200">
+                        <button id="view-profile-btn" class="text-left text-gray-700 hover:text-blue-600 transition-colors duration-200 hidden">
                             View My Profile
                         </button>
                         <button id="delete-account-btn" class="text-left text-red-500 hover:text-red-700 transition-colors duration-200">
@@ -80,7 +80,7 @@
                         </button>
                     </div>
                 </div>
-                <button id="sign-out-btn" class="text-left text-gray-700 hover:text-blue-600 transition-colors duration-200">
+                <button id="sign-out-btn" class="text-left text-gray-700 hover:text-blue-600 transition-colors duration-200 hidden">
                     Sign Out
                 </button>
             </div>
@@ -307,18 +307,20 @@
                         signInBtn.classList.add('hidden');
                         signOutBtn.classList.remove('hidden');
                         generateBtn.classList.remove('hidden');
-                        await checkUserProfile();
+                        accountManagementBtn.parentElement.classList.remove('hidden');
+                        deleteAccountBtn.classList.remove('hidden');
+                        if (!user.isAnonymous) {
+                            await checkUserProfile();
+                        } else {
+                            createProfileBtn.classList.add('hidden');
+                            viewProfileBtn.classList.add('hidden');
+                        }
                     } else {
                         userId = null;
                         signInBtn.classList.remove('hidden');
                         signOutBtn.classList.add('hidden');
-                        generateBtn.classList.remove('hidden');
-                        createProfileBtn.classList.add('hidden');
-                        viewProfileBtn.classList.add('hidden');
-                        deleteAccountBtn.classList.add('hidden');
-                        await signInAnonymously(auth);
+                        accountManagementBtn.parentElement.classList.add('hidden');
                     }
-                    isAuthReady = true;
                     handleRouting();
                 });
             } catch (error) {
@@ -364,12 +366,10 @@
                     currentUsername = docSnap.data().username;
                     createProfileBtn.classList.add('hidden');
                     viewProfileBtn.classList.remove('hidden');
-                    deleteAccountBtn.classList.remove('hidden');
                 } else {
                     hasProfile = false;
                     createProfileBtn.classList.remove('hidden');
                     viewProfileBtn.classList.add('hidden');
-                    deleteAccountBtn.classList.add('hidden');
                 }
             } catch (error) {
                 console.error("Error checking user profile:", error);
@@ -409,7 +409,7 @@
         }
 
         function showCreateProfileView() {
-            if (hasProfile) {
+            if (auth.currentUser && auth.currentUser.isAnonymous) {
                 history.pushState({}, '', '/');
                 showMainView();
                 return;
@@ -431,7 +431,6 @@
                 const querySnapshot = await getDocs(q);
 
                 if (querySnapshot.empty) {
-                    // Profile not found, redirect to 404
                     window.location.href = '/404.html';
                     return;
                 }
@@ -547,9 +546,9 @@
 
 
         async function generateLink() {
-            if (!isAuthReady) {
-                console.error("Auth is not ready yet.");
-                return;
+            if (!userId) {
+                console.log("User not authenticated, signing in anonymously...");
+                await signInAnonymously(auth);
             }
 
             const htmlContent = htmlInput.value.trim();
@@ -593,8 +592,8 @@
         }
 
         async function loadPage(pageId) {
-            if (!isAuthReady) {
-                console.error("Auth is not ready yet.");
+            if (!db) {
+                console.error("Firestore not initialized.");
                 return;
             }
 
@@ -638,8 +637,8 @@
         }
         
         async function loadUserLinks() {
-            if (!isAuthReady) {
-                linksList.innerHTML = '<p class="text-gray-500 text-center">Authentication not ready...</p>';
+            if (!userId) {
+                linksList.innerHTML = '<p class="text-gray-500 text-center">Sign in to view your links.</p>';
                 return;
             }
             
@@ -696,8 +695,8 @@
         }
 
         async function deleteAccount() {
-            if (!isAuthReady || !userId) {
-                console.error("Auth is not ready or user is not signed in.");
+            if (!userId) {
+                console.error("User ID not available.");
                 return;
             }
             
@@ -766,8 +765,7 @@
             }
         });
         menuBtn.addEventListener('click', () => {
-            menuModal.classList.remove('hidden');
-            setTimeout(() => menuModal.querySelector('div').classList.add('translate-x-0'), 10);
+            accountOptions.classList.toggle('hidden');
         });
         closeMenuBtn.addEventListener('click', () => {
             menuModal.querySelector('div').classList.remove('translate-x-0');
@@ -801,7 +799,12 @@
             history.pushState({}, '', `/account/createprofile`);
             showCreateProfileView();
         });
-
+        
+        menuBtn.addEventListener('click', () => {
+            menuModal.classList.remove('hidden');
+            setTimeout(() => menuModal.querySelector('div').classList.add('translate-x-0'), 10);
+        });
+        
         // Initialize on page load
         window.onload = initializeAppAndAuth;
     </script>
