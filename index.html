@@ -130,7 +130,7 @@
                 </div>
             </div>
             <!-- Iframe for secure and functional preview -->
-            <iframe id="page-content-iframe" title="Generated HTML"
+            <iframe id="page-content-iframe" title="Generated HTML" allowfullscreen
                     class="w-full min-h-[500px] bg-white rounded-md border border-gray-300"></iframe>
             <!-- Shimmer loader for the iframe -->
             <div id="shimmer-loader" class="w-full min-h-[500px] rounded-md shimmer"></div>
@@ -143,7 +143,7 @@
     <div id="confirmation-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900 bg-opacity-50 hidden">
         <div class="bg-white rounded-lg shadow-xl p-6 max-w-sm w-full">
             <p id="confirmation-text" class="text-lg text-gray-800 mb-4"></p>
-            <div class="flex justify-end space-x-2">
+            <div id="confirmation-buttons" class="flex justify-end space-x-2">
                 <button id="cancel-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-md">Cancel</button>
                 <button id="confirm-btn" class="bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-md">Delete</button>
             </div>
@@ -153,7 +153,7 @@
     <script type="module">
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, signOut } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, doc, getDoc, deleteDoc, query, where, getDocs, setDoc, setLogLevel } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-analytics.js";
 
@@ -188,6 +188,7 @@
         const shimmerLoader = document.getElementById('shimmer-loader');
         const confirmationModal = document.getElementById('confirmation-modal');
         const confirmationText = document.getElementById('confirmation-text');
+        const confirmationButtons = document.getElementById('confirmation-buttons');
         const confirmBtn = document.getElementById('confirm-btn');
         const cancelBtn = document.getElementById('cancel-btn');
         const menuBtn = document.getElementById('menu-btn');
@@ -403,8 +404,9 @@
             confirmationText.textContent = "Are you sure you want to delete this page? This action cannot be undone.";
             confirmBtn.textContent = "Delete";
             confirmationModal.classList.remove('hidden');
-
-            const confirmHandler = async () => {
+            confirmationButtons.classList.remove('hidden');
+            
+            confirmBtn.onclick = async () => {
                 try {
                     await deleteDoc(doc(db, `generatedPages`, docId));
                     console.log("Page deleted successfully!");
@@ -414,19 +416,12 @@
                     console.error("Error deleting document:", error);
                 } finally {
                     confirmationModal.classList.add('hidden');
-                    confirmBtn.removeEventListener('click', confirmHandler);
-                    cancelBtn.removeEventListener('click', cancelHandler);
                 }
             };
             
-            const cancelHandler = () => {
+            cancelBtn.onclick = () => {
                 confirmationModal.classList.add('hidden');
-                confirmBtn.removeEventListener('click', confirmHandler);
-                cancelBtn.removeEventListener('click', cancelHandler);
             };
-
-            confirmBtn.addEventListener('click', confirmHandler);
-            cancelBtn.addEventListener('click', cancelHandler);
         }
 
         async function deleteAccount() {
@@ -444,32 +439,34 @@
             confirmationText.textContent = "Are you sure you want to delete your account? Your pages will be hidden, but not permanently deleted. This action is irreversible.";
             confirmBtn.textContent = "Confirm";
             confirmationModal.classList.remove('hidden');
+            confirmationButtons.classList.remove('hidden');
 
             const confirmHandler = async () => {
                 try {
                     const docRef = doc(db, 'deletedUsers', userId);
                     await setDoc(docRef, { isDeleted: true });
-                    console.log("Account marked as deleted.");
-                    // After "deleting" the account, show the main view
-                    history.pushState({}, '', '/');
-                    showMainView();
+                    await signOut(auth);
+                    console.log("Account deleted and signed out.");
+                    
+                    confirmationText.textContent = "Your account has been deleted.";
+                    confirmationButtons.innerHTML = `
+                        <button id="refresh-page-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md">Refresh Page</button>
+                    `;
+                    document.getElementById('refresh-page-btn').onclick = () => {
+                        location.reload();
+                    };
                 } catch (error) {
                     console.error("Error marking account for deletion:", error);
-                } finally {
                     confirmationModal.classList.add('hidden');
-                    confirmBtn.removeEventListener('click', confirmHandler);
-                    cancelBtn.removeEventListener('click', cancelHandler);
                 }
             };
 
             const cancelHandler = () => {
                 confirmationModal.classList.add('hidden');
-                confirmBtn.removeEventListener('click', confirmHandler);
-                cancelBtn.removeEventListener('click', cancelHandler);
             };
 
-            confirmBtn.addEventListener('click', confirmHandler);
-            cancelBtn.addEventListener('click', cancelHandler);
+            confirmBtn.onclick = confirmHandler;
+            cancelBtn.onclick = cancelHandler;
         }
 
         // Event Listeners
