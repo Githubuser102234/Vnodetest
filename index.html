@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HTML Page Generator</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Inter font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -49,14 +48,12 @@
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
 
-    <!-- Hamburger Menu Button -->
     <button id="menu-btn" class="absolute top-4 left-4 z-50 p-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors duration-200">
         <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
         </svg>
     </button>
 
-    <!-- Side Menu Modal -->
     <div id="menu-modal" class="fixed inset-0 z-40 bg-gray-900 bg-opacity-50 hidden">
         <div class="fixed top-0 left-0 h-full w-64 bg-white rounded-r-lg shadow-xl p-6 transform -translate-x-full transition-transform duration-300 ease-in-out">
             <div class="flex flex-col space-y-4">
@@ -96,7 +93,6 @@
     </div>
 
     <div id="app-container" class="bg-white rounded-lg shadow-xl p-8 w-full max-w-2xl transition-all duration-300">
-        <!-- Main Form View -->
         <div id="main-view" class="flex flex-col space-y-6">
             <h1 class="text-3xl font-bold text-center text-gray-800">Generate Your HTML Page</h1>
             <p class="text-center text-gray-600">Enter your HTML code below and get a shareable link.</p>
@@ -106,7 +102,7 @@
                 Sign In with Google
             </button>
             
-            <textarea id="html-input" rows="15" placeholder="<!-- Enter your HTML code here -->"
+            <textarea id="html-input" rows="15" placeholder=""
                 class="w-full p-4 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 transition-colors duration-200 resize-none"></textarea>
             
             <button id="generate-btn"
@@ -114,7 +110,6 @@
                 Generate Link
             </button>
 
-            <!-- Loading & Result Display -->
             <div id="status-message" class="text-center text-sm font-medium hidden"></div>
 
             <div id="result-container" class="hidden flex flex-col space-y-2 p-4 bg-gray-50 rounded-md border border-gray-200">
@@ -124,7 +119,6 @@
             </div>
         </div>
 
-        <!-- Your Links View -->
         <div id="your-links-view" class="hidden flex flex-col space-y-4">
             <div class="flex flex-col sm:flex-row justify-between items-center mb-4 space-y-2 sm:space-y-0 sm:space-x-4 w-full">
                 <h2 class="text-xl font-bold text-gray-800">Your Created HTML Links</h2>
@@ -137,7 +131,6 @@
             </div>
         </div>
         
-        <!-- Create/Edit Profile View -->
         <div id="create-profile-view" class="hidden flex flex-col space-y-6">
             <h1 id="profile-form-header" class="text-3xl font-bold text-center text-gray-800">Create Personal Profile</h1>
             <p id="profile-form-subheader" class="text-center text-gray-600">Create a unique profile to share your work.</p>
@@ -155,7 +148,6 @@
             <textarea id="profile-bio" rows="5" placeholder="Tell us about yourself!"
                 class="w-full p-4 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 transition-colors duration-200 resize-none"></textarea>
             
-            <!-- New: Checkbox for hiding links -->
             <div id="hide-links-option" class="flex items-center space-x-2 hidden">
                 <input type="checkbox" id="hide-links-checkbox" class="h-4 w-4 text-blue-600 border-gray-300 rounded">
                 <label for="hide-links-checkbox" class="text-sm font-medium text-gray-700">Hide my HTML links on my public profile</label>
@@ -170,7 +162,6 @@
             </button>
         </div>
 
-        <!-- Profile View -->
         <div id="profile-view" class="hidden flex-col space-y-4">
             <div class="flex flex-col sm:flex-row justify-between items-center mb-4 space-y-2 sm:space-y-0 sm:space-x-4 w-full">
                 <div class="flex flex-col">
@@ -193,7 +184,6 @@
             </div>
         </div>
 
-        <!-- Preview View -->
         <div id="preview-view" class="hidden w-full h-full flex flex-col space-y-4">
             <div class="flex flex-col sm:flex-row justify-between items-center mb-4 space-y-2 sm:space-y-0 sm:space-x-4 w-full">
                 <h1 class="text-xl font-bold text-gray-800 mb-0">Page Preview</h1>
@@ -209,17 +199,14 @@
                     </button>
                 </div>
             </div>
-            <!-- Iframe for secure and functional preview -->
             <iframe id="page-content-iframe" title="Generated HTML" allowfullscreen
                     class="w-full min-h-[500px] bg-white rounded-md border border-gray-300"></iframe>
-            <!-- Shimmer loader for the iframe -->
             <div id="shimmer-loader" class="w-full min-h-[500px] rounded-md shimmer"></div>
             <p id="not-found-message" class="text-center text-gray-500 hidden mt-8">Sorry, that page was not found.</p>
             <p id="deleted-message" class="text-center text-gray-500 hidden mt-8">Sorry, the user that owns this HTML is no longer available. This HTML has been hidden.</p>
         </div>
     </div>
 
-    <!-- Confirmation Modal -->
     <div id="confirmation-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900 bg-opacity-50 hidden">
         <div class="bg-white rounded-lg shadow-xl p-6 max-w-sm w-full">
             <p id="confirmation-text" class="text-lg text-gray-800 mb-4"></p>
@@ -501,7 +488,7 @@
 
                 const profileDoc = querySnapshot.docs[0];
                 const profileData = profileDoc.data();
-                const profileUserId = profileData.userId;
+                const profileUserId = profileDoc.id;
 
                 profileNicknameDisplay.textContent = profileData.nickname;
                 profileUsernameDisplay.textContent = `@${profileData.username}`;
@@ -784,7 +771,14 @@
                 querySnapshot.forEach((doc) => {
                     const pageId = doc.id;
                     const pageUrl = `${window.location.origin}/pages/${pageId}`;
-                    linksHtml += `<a href="${pageUrl}" class="block text-sm text-blue-600 hover:text-blue-800 hover:underline break-all">${pageUrl}</a>`;
+                    linksHtml += `
+                        <div class="flex items-center justify-between space-x-2">
+                            <a href="${pageUrl}" class="block text-sm text-blue-600 hover:text-blue-800 hover:underline break-all">${pageUrl}</a>
+                            <button class="delete-link-btn text-red-500 hover:text-red-700 font-medium py-1 px-2 rounded-md transition-colors duration-200" data-doc-id="${pageId}">
+                                Delete
+                            </button>
+                        </div>
+                    `;
                 });
                 linksList.innerHTML = linksHtml;
                 
@@ -794,10 +788,7 @@
             }
         }
 
-        async function deletePage() {
-            const docId = deleteBtn.dataset.docId;
-            if (!docId) return;
-            
+        function showConfirmationModalForDelete(docId) {
             confirmationText.textContent = "Are you sure you want to delete this page? This action cannot be undone.";
             confirmBtn.textContent = "Delete";
             confirmationModal.classList.remove('hidden');
@@ -808,8 +799,8 @@
                     await deleteDoc(doc(db, `generatedPages`, docId));
                     localStorage.removeItem(`page_cache_${docId}`);
                     console.log("Page deleted successfully!");
-                    history.pushState({}, '', '/');
-                    showMainView();
+                    // Refresh the list after deletion
+                    loadUserLinks();
                 } catch (error) {
                     console.error("Error deleting document:", error);
                 } finally {
@@ -820,6 +811,12 @@
             cancelBtn.onclick = () => {
                 confirmationModal.classList.add('hidden');
             };
+        }
+
+        async function deletePage() {
+            const docId = deleteBtn.dataset.docId;
+            if (!docId) return;
+            showConfirmationModalForDelete(docId);
         }
 
         function clearCacheAndRefresh() {
@@ -953,6 +950,15 @@
         menuBtn.addEventListener('click', () => {
             menuModal.classList.remove('hidden');
             setTimeout(() => menuModal.querySelector('div').classList.add('translate-x-0'), 10);
+        });
+
+        // Event listener for deleting links from the list
+        linksList.addEventListener('click', (event) => {
+            const target = event.target.closest('.delete-link-btn');
+            if (target) {
+                const docId = target.dataset.docId;
+                showConfirmationModalForDelete(docId);
+            }
         });
         
         // Initialize on page load
