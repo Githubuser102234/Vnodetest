@@ -3,6 +3,14 @@
     {
       "source": "/pages/:pageId",
       "destination": "/?pageId=:pageId"
+    },
+    {
+      "source": "/account/createprofile",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/profiles/:username",
+      "destination": "/index.html"
     }
   ]
 }
