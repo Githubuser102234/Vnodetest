@@ -98,13 +98,18 @@
                 <a id="result-link" target="_blank"
                     class="break-all text-blue-600 hover:text-blue-800 hover:underline font-semibold cursor-pointer transition-colors duration-200"></a>
             </div>
+        </div>
 
-            <!-- Your Links View -->
-            <div id="your-links-view" class="hidden flex flex-col space-y-4">
+        <!-- Your Links View -->
+        <div id="your-links-view" class="hidden flex flex-col space-y-4">
+            <div class="flex flex-col sm:flex-row justify-between items-center mb-4 space-y-2 sm:space-y-0 sm:space-x-4 w-full">
                 <h2 class="text-xl font-bold text-gray-800">Your Created HTML Links</h2>
-                <div id="links-list" class="flex flex-col space-y-2 p-4 bg-gray-50 rounded-md border border-gray-200">
-                    <p class="text-gray-500 text-center">Loading your links...</p>
-                </div>
+                <button id="back-from-links-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-md transition-all duration-200 transform hover:scale-105 active:scale-95">
+                    Go Back
+                </button>
+            </div>
+            <div id="links-list" class="flex flex-col space-y-2 p-4 bg-gray-50 rounded-md border border-gray-200">
+                <p class="text-gray-500 text-center">Loading your links...</p>
             </div>
         </div>
 
@@ -167,6 +172,7 @@
         const appContainer = document.getElementById('app-container');
         const mainView = document.getElementById('main-view');
         const previewView = document.getElementById('preview-view');
+        const yourLinksView = document.getElementById('your-links-view');
         const htmlInput = document.getElementById('html-input');
         const generateBtn = document.getElementById('generate-btn');
         const statusMessage = document.getElementById('status-message');
@@ -174,6 +180,7 @@
         const resultLink = document.getElementById('result-link');
         const pageContentIframe = document.getElementById('page-content-iframe');
         const backBtn = document.getElementById('back-btn');
+        const backFromLinksBtn = document.getElementById('back-from-links-btn');
         const deleteBtn = document.getElementById('delete-btn');
         const fullscreenBtn = document.getElementById('fullscreen-btn');
         const notFoundMessage = document.getElementById('not-found-message');
@@ -190,7 +197,6 @@
         const accountManagementBtn = document.getElementById('account-management-btn');
         const accountOptions = document.getElementById('account-options');
         const deleteAccountBtn = document.getElementById('delete-account-btn');
-        const yourLinksView = document.getElementById('your-links-view');
         const linksList = document.getElementById('links-list');
 
         let db, auth;
@@ -239,20 +245,19 @@
         }
         
         function showYourLinksView() {
-            mainView.classList.remove('flex-col');
             mainView.classList.add('hidden');
             yourLinksView.classList.remove('hidden');
-            htmlInput.classList.add('hidden');
-            generateBtn.classList.add('hidden');
-            statusMessage.classList.add('hidden');
-            resultContainer.classList.add('hidden');
+            previewView.classList.add('hidden');
             menuModal.classList.add('hidden');
             menuModal.querySelector('div').classList.remove('translate-x-0');
+            appContainer.classList.remove('h-full', 'w-full');
+            appContainer.classList.add('max-w-2xl');
             loadUserLinks();
         }
 
         async function showPreview(pageId) {
             mainView.classList.add('hidden');
+            yourLinksView.classList.add('hidden');
             previewView.classList.remove('hidden');
             appContainer.classList.remove('max-w-2xl');
             appContainer.classList.add('h-full', 'w-full');
@@ -322,7 +327,7 @@
             try {
                 const docRef = doc(db, `generatedPages`, pageId);
                 const docSnap = await getDoc(docRef);
-                
+
                 shimmerLoader.classList.add('hidden');
                 pageContentIframe.classList.remove('hidden');
 
@@ -381,7 +386,7 @@
                 querySnapshot.forEach((doc) => {
                     const pageId = doc.id;
                     const pageUrl = `${window.location.origin}/pages/${pageId}`;
-                    linksHtml += `<a href="${pageUrl}" target="_blank" class="block text-sm text-blue-600 hover:text-blue-800 hover:underline break-all">${pageUrl}</a>`;
+                    linksHtml += `<a href="${pageUrl}" class="block text-sm text-blue-600 hover:text-blue-800 hover:underline break-all">${pageUrl}</a>`;
                 });
                 linksList.innerHTML = linksHtml;
                 
@@ -470,6 +475,10 @@
         // Event Listeners
         generateBtn.addEventListener('click', generateLink);
         backBtn.addEventListener('click', () => {
+            history.pushState({}, '', '/');
+            showMainView();
+        });
+        backFromLinksBtn.addEventListener('click', () => {
             history.pushState({}, '', '/');
             showMainView();
         });
