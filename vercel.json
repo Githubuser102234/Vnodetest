@@ -1,0 +1,9 @@
+{
+  "rewrites": [
+    {
+      "source": "/pages/:pageId",
+      "destination": "/?pageId=:pageId"
+    }
+  ]
+}
+
