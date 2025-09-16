@@ -19,6 +19,24 @@
             outline: none;
             box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
         }
+
+        /* Shimmer effect for loading */
+        .shimmer {
+            background: #f6f7f8;
+            background-image: linear-gradient(to right, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%);
+            background-repeat: no-repeat;
+            background-size: 800px 104px;
+            animation: shimmer 1.2s linear infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: -468px 0;
+            }
+            100% {
+                background-position: 468px 0;
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
@@ -55,9 +73,11 @@
                     Go Back
                 </button>
             </div>
-            <div id="page-content" class="w-full min-h-[500px] p-4 bg-white rounded-md border border-gray-300 overflow-auto">
-                <!-- Injected HTML will go here -->
-            </div>
+            <!-- Iframe for secure and functional preview -->
+            <iframe id="page-content-iframe" title="Generated HTML"
+                    class="w-full min-h-[500px] bg-white rounded-md border border-gray-300"></iframe>
+            <!-- Shimmer loader for the iframe -->
+            <div id="shimmer-loader" class="w-full min-h-[500px] rounded-md shimmer"></div>
             <p id="not-found-message" class="text-center text-gray-500 hidden mt-8">Sorry, that page was not found.</p>
         </div>
     </div>
@@ -89,9 +109,10 @@
         const statusMessage = document.getElementById('status-message');
         const resultContainer = document.getElementById('result-container');
         const resultLink = document.getElementById('result-link');
-        const pageContent = document.getElementById('page-content');
+        const pageContentIframe = document.getElementById('page-content-iframe');
         const backBtn = document.getElementById('back-btn');
         const notFoundMessage = document.getElementById('not-found-message');
+        const shimmerLoader = document.getElementById('shimmer-loader');
 
         let db, auth;
         let isAuthReady = false;
@@ -99,13 +120,12 @@
         async function initializeAppAndAuth() {
             try {
                 const app = initializeApp(firebaseConfig);
-                const analytics = getAnalytics(app); // Initialize analytics as requested
+                const analytics = getAnalytics(app);
                 db = getFirestore(app);
                 auth = getAuth(app);
                 setLogLevel('debug');
                 console.log("Firebase initialized.");
 
-                // Since we're using a hardcoded config, we will sign in anonymously
                 await signInAnonymously(auth);
                 isAuthReady = true;
                 console.log("Authentication successful.");
@@ -125,7 +145,6 @@
 
             } catch (error) {
                 console.error("Error initializing Firebase or authentication:", error);
-                // Fallback to showing the main view
                 showMainView();
             }
         }
@@ -142,7 +161,8 @@
             previewView.classList.remove('hidden');
             appContainer.classList.remove('max-w-2xl');
             appContainer.classList.add('h-full', 'w-full');
-            pageContent.innerHTML = '<div class="text-center text-gray-500 mt-8">Loading...</div>';
+            shimmerLoader.classList.remove('hidden');
+            pageContentIframe.classList.add('hidden');
             notFoundMessage.classList.add('hidden');
             await loadPage(pageId);
         }
@@ -168,7 +188,6 @@
             generateBtn.disabled = true;
 
             try {
-                // Storing the document in a top-level collection since appId is not available
                 const docRef = await addDoc(collection(db, `generatedPages`), {
                     html: htmlContent,
                     createdAt: new Date()
@@ -200,21 +219,23 @@
             }
 
             try {
-                // Fetching from the top-level collection
                 const docRef = doc(db, `generatedPages`, pageId);
                 const docSnap = await getDoc(docRef);
 
+                shimmerLoader.classList.add('hidden');
+                pageContentIframe.classList.remove('hidden');
+
                 if (docSnap.exists()) {
                     const data = docSnap.data();
-                    pageContent.innerHTML = data.html;
+                    pageContentIframe.srcdoc = data.html;
                 } else {
-                    pageContent.innerHTML = '';
+                    pageContentIframe.srcdoc = '';
                     notFoundMessage.classList.remove('hidden');
                     console.log("Document not found for ID:", pageId);
                 }
             } catch (error) {
                 console.error("Error loading page:", error);
-                pageContent.innerHTML = '';
+                pageContentIframe.srcdoc = '';
                 notFoundMessage.classList.remove('hidden');
             }
         }
