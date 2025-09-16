@@ -19,6 +19,10 @@
             outline: none;
             box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
         }
+        input:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+        }
 
         /* Shimmer effect for loading */
         .shimmer {
@@ -60,14 +64,25 @@
                 <button id="your-links-btn" class="text-left text-gray-700 hover:text-blue-600 transition-colors duration-200">
                     Your Created HTML Links
                 </button>
-                <button id="account-management-btn" class="text-left text-gray-700 hover:text-blue-600 transition-colors duration-200">
-                    Account Management
-                </button>
-                <div id="account-options" class="pl-4 hidden flex flex-col space-y-2 pt-2 border-t mt-2">
-                    <button id="delete-account-btn" class="text-left text-red-500 hover:text-red-700 transition-colors duration-200">
-                        Delete Account
+                <div id="account-management-menu">
+                    <button id="account-management-btn" class="text-left text-gray-700 hover:text-blue-600 transition-colors duration-200">
+                        Account Management
                     </button>
+                    <div id="account-options" class="pl-4 hidden flex flex-col space-y-2 pt-2 border-t mt-2">
+                        <button id="create-profile-btn" class="text-left text-gray-700 hover:text-blue-600 transition-colors duration-200">
+                            Create Personal Profile
+                        </button>
+                        <button id="view-profile-btn" class="text-left text-gray-700 hover:text-blue-600 transition-colors duration-200">
+                            View My Profile
+                        </button>
+                        <button id="delete-account-btn" class="text-left text-red-500 hover:text-red-700 transition-colors duration-200">
+                            Delete Account
+                        </button>
+                    </div>
                 </div>
+                <button id="sign-out-btn" class="text-left text-gray-700 hover:text-blue-600 transition-colors duration-200">
+                    Sign Out
+                </button>
             </div>
             <button id="close-menu-btn" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -82,6 +97,12 @@
         <div id="main-view" class="flex flex-col space-y-6">
             <h1 class="text-3xl font-bold text-center text-gray-800">Generate Your HTML Page</h1>
             <p class="text-center text-gray-600">Enter your HTML code below and get a shareable link.</p>
+
+            <button id="sign-in-btn"
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-md transition-all duration-200 transform hover:scale-105 active:scale-95">
+                Sign In with Google
+            </button>
+            
             <textarea id="html-input" rows="15" placeholder="<!-- Enter your HTML code here -->"
                 class="w-full p-4 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 transition-colors duration-200 resize-none"></textarea>
             
@@ -110,6 +131,56 @@
             </div>
             <div id="links-list" class="flex flex-col space-y-2 p-4 bg-gray-50 rounded-md border border-gray-200">
                 <p class="text-gray-500 text-center">Loading your links...</p>
+            </div>
+        </div>
+        
+        <!-- Create Profile View -->
+        <div id="create-profile-view" class="hidden flex flex-col space-y-6">
+            <h1 class="text-3xl font-bold text-center text-gray-800">Create Personal Profile</h1>
+            <p class="text-center text-gray-600">Create a unique profile to share your work.</p>
+            
+            <label for="profile-nickname" class="text-sm font-medium text-gray-700">Nickname</label>
+            <input type="text" id="profile-nickname" placeholder="Your nickname"
+                class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 transition-colors duration-200">
+            
+            <label for="profile-username" class="text-sm font-medium text-gray-700">Username</label>
+            <input type="text" id="profile-username" placeholder="A unique username"
+                class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 transition-colors duration-200">
+            <p id="username-status" class="text-sm font-medium text-red-500"></p>
+
+            <label for="profile-bio" class="text-sm font-medium text-gray-700">Bio</label>
+            <textarea id="profile-bio" rows="5" placeholder="Tell us about yourself!"
+                class="w-full p-4 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 transition-colors duration-200 resize-none"></textarea>
+            
+            <button id="create-profile-btn-submit"
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-md transition-all duration-200 transform hover:scale-105 active:scale-95">
+                Create Profile
+            </button>
+            <button id="back-from-create-profile-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-md transition-all duration-200 transform hover:scale-105 active:scale-95">
+                Go Back
+            </button>
+        </div>
+
+        <!-- Profile View -->
+        <div id="profile-view" class="hidden flex-col space-y-4">
+            <div class="flex flex-col sm:flex-row justify-between items-center mb-4 space-y-2 sm:space-y-0 sm:space-x-4 w-full">
+                <div class="flex flex-col">
+                    <h1 id="profile-nickname-display" class="text-3xl font-bold text-gray-800"></h1>
+                    <p id="profile-username-display" class="text-gray-500 text-sm"></p>
+                </div>
+                <div class="flex space-x-2">
+                    <button id="edit-profile-btn" class="hidden bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-md transition-all duration-200 transform hover:scale-105 active:scale-95">
+                        Edit
+                    </button>
+                    <button id="back-from-profile-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-md transition-all duration-200 transform hover:scale-105 active:scale-95">
+                        Go Back
+                    </button>
+                </div>
+            </div>
+            <p id="profile-bio-display" class="text-gray-700 leading-relaxed"></p>
+            <h2 class="text-xl font-bold text-gray-800 border-t pt-4 mt-4">Created Pages</h2>
+            <div id="profile-links-list" class="flex flex-col space-y-2 p-4 bg-gray-50 rounded-md border border-gray-200">
+                <p class="text-gray-500 text-center">Loading created pages...</p>
             </div>
         </div>
 
@@ -153,8 +224,8 @@
     <script type="module">
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signOut } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, doc, getDoc, deleteDoc, query, where, getDocs, setDoc, setLogLevel } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, signOut, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, doc, getDoc, deleteDoc, query, where, getDocs, setDoc, setLogLevel, updateDoc } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-analytics.js";
 
         // Your web app's Firebase configuration
@@ -199,9 +270,27 @@
         const accountOptions = document.getElementById('account-options');
         const deleteAccountBtn = document.getElementById('delete-account-btn');
         const linksList = document.getElementById('links-list');
+        const signInBtn = document.getElementById('sign-in-btn');
+        const signOutBtn = document.getElementById('sign-out-btn');
+        const createProfileBtn = document.getElementById('create-profile-btn');
+        const createProfileView = document.getElementById('create-profile-view');
+        const profileNicknameInput = document.getElementById('profile-nickname');
+        const profileUsernameInput = document.getElementById('profile-username');
+        const profileBioInput = document.getElementById('profile-bio');
+        const createProfileSubmitBtn = document.getElementById('create-profile-btn-submit');
+        const usernameStatus = document.getElementById('username-status');
+        const backFromCreateProfileBtn = document.getElementById('back-from-create-profile-btn');
+        const profileView = document.getElementById('profile-view');
+        const profileNicknameDisplay = document.getElementById('profile-nickname-display');
+        const profileUsernameDisplay = document.getElementById('profile-username-display');
+        const profileBioDisplay = document.getElementById('profile-bio-display');
+        const profileLinksList = document.getElementById('profile-links-list');
+        const viewProfileBtn = document.getElementById('view-profile-btn');
+        const backFromProfileBtn = document.getElementById('back-from-profile-btn');
+        const editProfileBtn = document.getElementById('edit-profile-btn');
 
-        let db, auth;
-        let isAuthReady = false;
+
+        let db, auth, userId, hasProfile = false, currentUsername = null;
 
         async function initializeAppAndAuth() {
             try {
@@ -212,65 +301,250 @@
                 setLogLevel('debug');
                 console.log("Firebase initialized.");
 
-                await signInAnonymously(auth);
-                isAuthReady = true;
-                console.log("Authentication successful.");
-                
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        signInBtn.classList.add('hidden');
+                        signOutBtn.classList.remove('hidden');
+                        generateBtn.classList.remove('hidden');
+                        await checkUserProfile();
+                    } else {
+                        userId = null;
+                        signInBtn.classList.remove('hidden');
+                        signOutBtn.classList.add('hidden');
+                        generateBtn.classList.remove('hidden');
+                        createProfileBtn.classList.add('hidden');
+                        viewProfileBtn.classList.add('hidden');
+                        deleteAccountBtn.classList.add('hidden');
+                        await signInAnonymously(auth);
+                    }
+                    isAuthReady = true;
+                    handleRouting();
+                });
+            } catch (error) {
+                console.error("Error initializing Firebase or authentication:", error);
+                handleRouting();
+            }
+        }
+        
+        function handleRouting() {
+            const path = window.location.pathname;
+            if (path.startsWith('/profiles/')) {
+                const username = path.split('/')[2];
+                if (username) {
+                    showProfileView(username);
+                } else {
+                    showMainView();
+                }
+            } else if (path === '/account/createprofile') {
+                showCreateProfileView();
+            } else {
                 const urlParams = new URLSearchParams(window.location.search);
-                const pageIdFromQuery = urlParams.get('pageId');
-                const pathParts = window.location.pathname.split('/');
-                const pageIdFromPath = (pathParts.length > 2 && pathParts[1] === 'pages') ? pathParts[2] : null;
-
-                const pageId = pageIdFromPath || pageIdFromQuery;
-                
+                const pageId = urlParams.get('pageId');
                 if (pageId) {
                     showPreview(pageId);
                 } else {
                     showMainView();
                 }
-
-            } catch (error) {
-                console.error("Error initializing Firebase or authentication:", error);
-                showMainView();
             }
         }
 
-        function showMainView() {
-            mainView.classList.remove('hidden');
-            yourLinksView.classList.add('hidden');
-            previewView.classList.add('hidden');
-            appContainer.classList.remove('h-full', 'w-full');
-            appContainer.classList.add('max-w-2xl');
+        async function checkUserProfile() {
+            if (!userId) {
+                hasProfile = false;
+                createProfileBtn.classList.add('hidden');
+                viewProfileBtn.classList.add('hidden');
+                return;
+            }
+            try {
+                const docRef = doc(db, 'profiles', userId);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    hasProfile = true;
+                    currentUsername = docSnap.data().username;
+                    createProfileBtn.classList.add('hidden');
+                    viewProfileBtn.classList.remove('hidden');
+                    deleteAccountBtn.classList.remove('hidden');
+                } else {
+                    hasProfile = false;
+                    createProfileBtn.classList.remove('hidden');
+                    viewProfileBtn.classList.add('hidden');
+                    deleteAccountBtn.classList.add('hidden');
+                }
+            } catch (error) {
+                console.error("Error checking user profile:", error);
+                hasProfile = false;
+            }
+        }
+
+        function showView(viewId) {
+            const views = [mainView, yourLinksView, previewView, createProfileView, profileView];
+            views.forEach(view => {
+                if (view.id === viewId) {
+                    view.classList.remove('hidden');
+                    view.style.display = 'flex';
+                } else {
+                    view.classList.add('hidden');
+                    view.style.display = 'none';
+                }
+            });
+            if (viewId === 'preview-view' || viewId === 'profile-view') {
+                appContainer.classList.remove('max-w-2xl');
+                appContainer.classList.add('h-full', 'w-full');
+            } else {
+                appContainer.classList.remove('h-full', 'w-full');
+                appContainer.classList.add('max-w-2xl');
+            }
             menuModal.classList.add('hidden');
             menuModal.querySelector('div').classList.remove('translate-x-0');
+        }
+
+        function showMainView() {
+            showView('main-view');
         }
         
         function showYourLinksView() {
-            mainView.classList.add('hidden');
-            yourLinksView.classList.remove('hidden');
-            previewView.classList.add('hidden');
-            menuModal.classList.add('hidden');
-            menuModal.querySelector('div').classList.remove('translate-x-0');
-            appContainer.classList.remove('h-full', 'w-full');
-            appContainer.classList.add('max-w-2xl');
+            showView('your-links-view');
             loadUserLinks();
         }
 
+        function showCreateProfileView() {
+            if (hasProfile) {
+                history.pushState({}, '', '/');
+                showMainView();
+                return;
+            }
+            showView('create-profile-view');
+        }
+
+        async function showProfileView(username) {
+            showView('profile-view');
+            
+            profileNicknameDisplay.textContent = 'Loading...';
+            profileUsernameDisplay.textContent = '';
+            profileBioDisplay.textContent = '';
+            profileLinksList.innerHTML = '<p class="text-gray-500 text-center">Loading...</p>';
+            editProfileBtn.classList.add('hidden');
+
+            try {
+                const q = query(collection(db, 'profiles'), where('username', '==', username));
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    // Profile not found, redirect to 404
+                    window.location.href = '/404.html';
+                    return;
+                }
+
+                const profileDoc = querySnapshot.docs[0];
+                const profileData = profileDoc.data();
+                const profileUserId = profileData.userId;
+
+                profileNicknameDisplay.textContent = profileData.nickname;
+                profileUsernameDisplay.textContent = `@${profileData.username}`;
+                profileBioDisplay.textContent = profileData.bio;
+                
+                if (userId && profileUserId === userId) {
+                    editProfileBtn.classList.remove('hidden');
+                }
+
+                const linksQuery = query(collection(db, `generatedPages`), where("userId", "==", profileUserId));
+                const linksSnapshot = await getDocs(linksQuery);
+
+                if (linksSnapshot.empty) {
+                    profileLinksList.innerHTML = '<p class="text-gray-500 text-center">This user has not created any pages yet.</p>';
+                } else {
+                    let linksHtml = '';
+                    linksSnapshot.forEach((doc) => {
+                        const pageId = doc.id;
+                        const pageUrl = `${window.location.origin}/pages/${pageId}`;
+                        linksHtml += `<a href="${pageUrl}" class="block text-sm text-blue-600 hover:text-blue-800 hover:underline break-all">${pageUrl}</a>`;
+                    });
+                    profileLinksList.innerHTML = linksHtml;
+                }
+
+            } catch (error) {
+                console.error("Error loading profile:", error);
+                profileLinksList.innerHTML = '<p class="text-red-500 text-center">Error loading profile data.</p>';
+            }
+        }
+
         async function showPreview(pageId) {
-            mainView.classList.add('hidden');
-            yourLinksView.classList.add('hidden');
-            previewView.classList.remove('hidden');
-            appContainer.classList.remove('max-w-2xl');
-            appContainer.classList.add('h-full', 'w-full');
+            showView('preview-view');
             shimmerLoader.classList.remove('hidden');
             pageContentIframe.classList.add('hidden');
             notFoundMessage.classList.add('hidden');
             deletedMessage.classList.add('hidden');
             deleteBtn.classList.add('hidden');
-            menuModal.classList.add('hidden');
-            menuModal.querySelector('div').classList.remove('translate-x-0');
             await loadPage(pageId);
         }
+
+        async function signInWithGoogle() {
+            const provider = new GoogleAuthProvider();
+            try {
+                await signInWithPopup(auth, provider);
+                console.log("Signed in with Google successfully.");
+            } catch (error) {
+                console.error("Error during Google sign-in:", error);
+            }
+        }
+
+        async function signOutUser() {
+            try {
+                await signOut(auth);
+                console.log("User signed out.");
+                history.pushState({}, '', '/');
+                showMainView();
+            } catch (error) {
+                console.error("Error signing out:", error);
+            }
+        }
+
+        async function createOrUpdateProfile() {
+            const username = profileUsernameInput.value.trim().toLowerCase();
+            const nickname = profileNicknameInput.value.trim();
+            const bio = profileBioInput.value.trim();
+
+            if (!username || !nickname) {
+                usernameStatus.textContent = "Nickname and username are required.";
+                return;
+            }
+
+            if (!/^[a-z0-9-_]+$/.test(username)) {
+                usernameStatus.textContent = "Username can only contain lowercase letters, numbers, hyphens, and underscores.";
+                return;
+            }
+
+            try {
+                // Check if username is already taken
+                const usernameQuery = query(collection(db, 'profiles'), where('username', '==', username));
+                const usernameSnapshot = await getDocs(usernameQuery);
+                const unavailableQuery = query(collection(db, 'unavailableUsernames'), where('username', '==', username));
+                const unavailableSnapshot = await getDocs(unavailableQuery);
+
+                if (!usernameSnapshot.empty || !unavailableSnapshot.empty) {
+                    usernameStatus.textContent = "This username is already taken.";
+                    return;
+                }
+
+                await setDoc(doc(db, 'profiles', userId), {
+                    nickname,
+                    username,
+                    bio,
+                    userId,
+                    createdAt: new Date()
+                });
+
+                console.log("Profile created successfully!");
+                history.pushState({}, '', `/profiles/${username}`);
+                showProfileView(username);
+
+            } catch (error) {
+                console.error("Error creating profile:", error);
+                usernameStatus.textContent = "An error occurred. Please try again.";
+            }
+        }
+
 
         async function generateLink() {
             if (!isAuthReady) {
@@ -293,7 +567,6 @@
             generateBtn.disabled = true;
 
             try {
-                const userId = auth.currentUser.uid;
                 const docRef = await addDoc(collection(db, `generatedPages`), {
                     html: htmlContent,
                     userId: userId,
@@ -346,8 +619,7 @@
 
                     pageContentIframe.srcdoc = data.html;
                     
-                    const currentUserId = auth.currentUser.uid;
-                    if (data.userId && data.userId === currentUserId) {
+                    if (userId && data.userId === userId) {
                         deleteBtn.classList.remove('hidden');
                         deleteBtn.dataset.docId = pageId;
                     } else {
@@ -374,7 +646,6 @@
             linksList.innerHTML = '<p class="text-gray-500 text-center">Loading your links...</p>';
             
             try {
-                const userId = auth.currentUser.uid;
                 const q = query(collection(db, `generatedPages`), where("userId", "==", userId));
                 const querySnapshot = await getDocs(q);
                 
@@ -425,28 +696,31 @@
         }
 
         async function deleteAccount() {
-            if (!isAuthReady) {
-                console.error("Auth is not ready yet.");
+            if (!isAuthReady || !userId) {
+                console.error("Auth is not ready or user is not signed in.");
                 return;
             }
             
-            const userId = auth.currentUser.uid;
-            if (!userId) {
-                console.error("User ID not available.");
-                return;
-            }
-
-            confirmationText.textContent = "Are you sure you want to delete your account? Your pages will be hidden, but not permanently deleted. This action is irreversible.";
+            confirmationText.textContent = "Are you sure you want to delete your account? Your profile will be permanently deleted, and your pages will be hidden. Your username cannot be reused.";
             confirmBtn.textContent = "Confirm";
             confirmationModal.classList.remove('hidden');
             confirmationButtons.classList.remove('hidden');
 
             const confirmHandler = async () => {
                 try {
-                    const docRef = doc(db, 'deletedUsers', userId);
-                    await setDoc(docRef, { isDeleted: true });
+                    const profileRef = doc(db, 'profiles', userId);
+                    const profileSnap = await getDoc(profileRef);
+                    const profileData = profileSnap.data();
+
+                    if (profileData && profileData.username) {
+                        await setDoc(doc(db, 'unavailableUsernames', profileData.username), {
+                            deletedAt: new Date()
+                        });
+                        await deleteDoc(profileRef);
+                    }
+                    
+                    await setDoc(doc(db, 'deletedUsers', userId), { isDeleted: true });
                     await signOut(auth);
-                    console.log("Account deleted and signed out.");
                     
                     confirmationText.textContent = "Your account has been deleted.";
                     confirmationButtons.innerHTML = `
@@ -456,7 +730,7 @@
                         location.reload();
                     };
                 } catch (error) {
-                    console.error("Error marking account for deletion:", error);
+                    console.error("Error deleting account:", error);
                     confirmationModal.classList.add('hidden');
                 }
             };
@@ -504,6 +778,29 @@
         });
         yourLinksBtn.addEventListener('click', showYourLinksView);
         deleteAccountBtn.addEventListener('click', deleteAccount);
+        signInBtn.addEventListener('click', signInWithGoogle);
+        signOutBtn.addEventListener('click', signOutUser);
+        createProfileBtn.addEventListener('click', () => {
+            history.pushState({}, '', '/account/createprofile');
+            showCreateProfileView();
+        });
+        backFromCreateProfileBtn.addEventListener('click', () => {
+            history.pushState({}, '', '/');
+            showMainView();
+        });
+        createProfileSubmitBtn.addEventListener('click', createOrUpdateProfile);
+        viewProfileBtn.addEventListener('click', () => {
+            history.pushState({}, '', `/profiles/${currentUsername}`);
+            showProfileView(currentUsername);
+        });
+        backFromProfileBtn.addEventListener('click', () => {
+            history.pushState({}, '', '/');
+            showMainView();
+        });
+        editProfileBtn.addEventListener('click', () => {
+            history.pushState({}, '', `/account/createprofile`);
+            showCreateProfileView();
+        });
 
         // Initialize on page load
         window.onload = initializeAppAndAuth;
