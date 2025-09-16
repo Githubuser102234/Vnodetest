@@ -80,6 +80,9 @@
                         </button>
                     </div>
                 </div>
+                <button id="clear-cache-btn" class="text-left text-gray-700 hover:text-blue-600 transition-colors duration-200">
+                    Clear Cache
+                </button>
                 <button id="sign-out-btn" class="text-left text-gray-700 hover:text-blue-600 transition-colors duration-200 hidden">
                     Sign Out
                 </button>
@@ -152,6 +155,12 @@
             <textarea id="profile-bio" rows="5" placeholder="Tell us about yourself!"
                 class="w-full p-4 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 transition-colors duration-200 resize-none"></textarea>
             
+            <!-- New: Checkbox for hiding links -->
+            <div id="hide-links-option" class="flex items-center space-x-2 hidden">
+                <input type="checkbox" id="hide-links-checkbox" class="h-4 w-4 text-blue-600 border-gray-300 rounded">
+                <label for="hide-links-checkbox" class="text-sm font-medium text-gray-700">Hide my HTML links on my public profile</label>
+            </div>
+
             <button id="create-profile-btn-submit"
                 class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-md transition-all duration-200 transform hover:scale-105 active:scale-95">
                 Create Profile
@@ -290,6 +299,9 @@
         const editProfileBtn = document.getElementById('edit-profile-btn');
         const profileFormHeader = document.getElementById('profile-form-header');
         const profileFormSubheader = document.getElementById('profile-form-subheader');
+        const clearCacheBtn = document.getElementById('clear-cache-btn');
+        const hideLinksCheckbox = document.getElementById('hide-links-checkbox');
+        const hideLinksOption = document.getElementById('hide-links-option');
 
 
         let db, auth, userId, hasProfile = false, currentUsername = null, isEditingProfile = false;
@@ -440,6 +452,7 @@
                 profileFormSubheader.textContent = "Update your nickname and bio.";
                 createProfileSubmitBtn.textContent = "Update Profile";
                 profileUsernameInput.disabled = true;
+                hideLinksOption.classList.remove('hidden');
 
                 try {
                     const profileDoc = await getDoc(doc(db, 'profiles', userId));
@@ -448,6 +461,7 @@
                         profileNicknameInput.value = data.nickname;
                         profileUsernameInput.value = data.username;
                         profileBioInput.value = data.bio;
+                        hideLinksCheckbox.checked = data.hideLinks || false;
                     }
                 } catch (error) {
                     console.error("Error fetching profile data for editing:", error);
@@ -462,6 +476,8 @@
                 profileNicknameInput.value = '';
                 profileUsernameInput.value = '';
                 profileBioInput.value = '';
+                hideLinksOption.classList.add('hidden');
+                hideLinksCheckbox.checked = false;
             }
         }
 
@@ -493,6 +509,11 @@
                 
                 if (userId && profileUserId === userId) {
                     editProfileBtn.classList.remove('hidden');
+                }
+                
+                if (profileData.hideLinks && profileUserId !== userId) {
+                    profileLinksList.innerHTML = '<p class="text-gray-500 text-center">This user has chosen to hide their created pages.</p>';
+                    return;
                 }
 
                 const linksQuery = query(collection(db, `generatedPages`), where("userId", "==", profileUserId));
@@ -602,6 +623,7 @@
         async function updateProfile() {
             const nickname = profileNicknameInput.value.trim();
             const bio = profileBioInput.value.trim();
+            const hideLinks = hideLinksCheckbox.checked;
             
             if (!nickname) {
                 usernameStatus.textContent = "Nickname is required.";
@@ -611,7 +633,8 @@
             try {
                 await updateDoc(doc(db, 'profiles', userId), {
                     nickname,
-                    bio
+                    bio,
+                    hideLinks
                 });
                 console.log("Profile updated successfully!");
                 history.pushState({}, '', `/profiles/${currentUsername}`);
@@ -657,6 +680,7 @@
                 statusMessage.classList.remove('text-blue-600', 'text-red-600');
                 statusMessage.classList.add('text-green-600');
                 resultContainer.classList.remove('hidden');
+                localStorage.setItem(`page_cache_${docRef.id}`, JSON.stringify({ html: htmlContent, userId: userId }));
 
             } catch (error) {
                 console.error("Error generating link:", error);
@@ -671,6 +695,30 @@
         async function loadPage(pageId) {
             if (!db) {
                 console.error("Firestore not initialized.");
+                return;
+            }
+            
+            // Check cache first
+            const cachedPage = localStorage.getItem(`page_cache_${pageId}`);
+            if (cachedPage) {
+                const { html } = JSON.parse(cachedPage);
+                pageContentIframe.srcdoc = html;
+                shimmerLoader.classList.add('hidden');
+                pageContentIframe.classList.remove('hidden');
+                console.log("Page loaded from cache.");
+                
+                // If the user is authenticated and is the owner, show delete button.
+                try {
+                    const pageDocRef = doc(db, `generatedPages`, pageId);
+                    const docSnap = await getDoc(pageDocRef);
+                    if (docSnap.exists() && userId && docSnap.data().userId === userId) {
+                        deleteBtn.classList.remove('hidden');
+                        deleteBtn.dataset.docId = pageId;
+                    }
+                } catch (error) {
+                    console.error("Error checking page ownership:", error);
+                }
+                
                 return;
             }
 
@@ -694,6 +742,9 @@
 
                     pageContentIframe.srcdoc = data.html;
                     
+                    // Cache the fetched page
+                    localStorage.setItem(`page_cache_${pageId}`, JSON.stringify({ html: data.html, userId: data.userId }));
+
                     if (userId && data.userId === userId) {
                         deleteBtn.classList.remove('hidden');
                         deleteBtn.dataset.docId = pageId;
@@ -755,6 +806,7 @@
             confirmBtn.onclick = async () => {
                 try {
                     await deleteDoc(doc(db, `generatedPages`, docId));
+                    localStorage.removeItem(`page_cache_${docId}`);
                     console.log("Page deleted successfully!");
                     history.pushState({}, '', '/');
                     showMainView();
@@ -763,6 +815,27 @@
                 } finally {
                     confirmationModal.classList.add('hidden');
                 }
+            };
+            
+            cancelBtn.onclick = () => {
+                confirmationModal.classList.add('hidden');
+            };
+        }
+
+        function clearCacheAndRefresh() {
+            confirmationText.textContent = "Are you sure you want to clear the local cache? This will refresh the page and load everything from the database on your next visit.";
+            confirmBtn.textContent = "Clear";
+            confirmationModal.classList.remove('hidden');
+            confirmationButtons.classList.remove('hidden');
+            
+            confirmBtn.onclick = () => {
+                try {
+                    localStorage.clear();
+                    console.log("Local cache cleared.");
+                } catch (error) {
+                    console.error("Error clearing local storage:", error);
+                }
+                location.reload();
             };
             
             cancelBtn.onclick = () => {
@@ -875,6 +948,7 @@
             history.pushState({}, '', `/account/createprofile`);
             showCreateProfileView();
         });
+        clearCacheBtn.addEventListener('click', clearCacheAndRefresh);
         
         menuBtn.addEventListener('click', () => {
             menuModal.classList.remove('hidden');
